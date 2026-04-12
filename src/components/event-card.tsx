@@ -1,5 +1,6 @@
 import type { Event } from "@/types/events";
 import { getCategoryConfig } from "@/lib/constants";
+import ExpandableText from "./expandable-text";
 
 interface EventCardProps {
   event: Event;
@@ -55,9 +56,7 @@ export default function EventCard({ event }: EventCardProps) {
           {event.title}
         </h3>
 
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {event.description}
-        </p>
+        <ExpandableText text={event.description} />
 
         <div className="mt-auto flex flex-col gap-1 pt-2 text-xs text-gray-500">
           <div className="flex items-center gap-1">
