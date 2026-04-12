@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import type { Event, EventCategory } from "@/types/events";
 import { supabase } from "@/lib/supabase";
-import { SEED_EVENTS } from "@/lib/seed-data";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import EventList from "@/components/event-list";
@@ -15,35 +14,32 @@ export default function Home() {
     EventCategory | "all"
   >("all");
   const [loading, setLoading] = useState(true);
-  const [usingSeedData, setUsingSeedData] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEvents() {
       if (!supabase) {
-        setEvents(SEED_EVENTS);
-        setUsingSeedData(true);
+        setError("Supabase is not configured. Check environment variables.");
         setLoading(false);
         return;
       }
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const { data, error } = await supabase
+        const { data, error: dbError } = await supabase
           .from("events")
           .select("*")
           .gte("start_date", today)
           .eq("family_friendly", true)
           .order("start_date", { ascending: true });
 
-        if (error || !data || data.length === 0) {
-          setEvents(SEED_EVENTS);
-          setUsingSeedData(true);
+        if (dbError) {
+          setError(`Failed to load events: ${dbError.message}`);
         } else {
           setEvents(data as Event[]);
         }
       } catch {
-        setEvents(SEED_EVENTS);
-        setUsingSeedData(true);
+        setError("Could not connect to the database. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -74,9 +70,9 @@ export default function Home() {
           onChange={setSelectedCategory}
         />
 
-        {usingSeedData && (
-          <div className="mt-4 rounded-lg bg-amber-50 px-4 py-2 text-xs text-amber-700">
-            Showing sample events — connect Supabase to see real data
+        {error && (
+          <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
           </div>
         )}
 
