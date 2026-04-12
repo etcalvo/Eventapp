@@ -1,6 +1,7 @@
 import type { Event } from "@/types/events";
 import { getCategoryConfig } from "@/lib/constants";
 import ExpandableText from "./expandable-text";
+import AddToCalendarButton from "./add-to-calendar-button";
 
 interface EventCardProps {
   event: Event;
@@ -80,16 +81,19 @@ export default function EventCard({ event }: EventCardProps) {
           )}
         </div>
 
-        {event.url && (
-          <a
-            href={event.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800"
-          >
-            More info →
-          </a>
-        )}
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <AddToCalendarButton event={event} />
+          {event.url && (
+            <a
+              href={event.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800"
+            >
+              More info →
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );
