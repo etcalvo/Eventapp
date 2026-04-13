@@ -112,11 +112,17 @@ export function generateGoogleCalendarUrl(event: Event): string {
 
   let dates: string;
   if (hasTime) {
-    const startDt = formatIcsDateTime(event.start_date, event.start_time as string);
+    const startDt = formatIcsDateTime(
+      event.start_date,
+      event.start_time as string,
+    );
     const isMultiDay = endDate !== event.start_date;
     const endDt = isMultiDay
       ? formatIcsDateTime(endDate, event.start_time as string)
-      : formatIcsDateTime(event.start_date, addHoursToTime(event.start_time as string, 2));
+      : formatIcsDateTime(
+          event.start_date,
+          addHoursToTime(event.start_time as string, 2),
+        );
     dates = `${startDt}/${endDt}`;
   } else {
     const startD = toIcsDateString(event.start_date);

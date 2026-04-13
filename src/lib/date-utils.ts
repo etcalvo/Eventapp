@@ -35,7 +35,11 @@ export function getCalendarDays(year: number, month: number): CalendarDay[][] {
   if (remaining < 7) {
     for (let i = 1; i <= remaining; i++) {
       const date = new Date(year, month + 1, i);
-      days.push({ date, dateString: toDateString(date), isCurrentMonth: false });
+      days.push({
+        date,
+        dateString: toDateString(date),
+        isCurrentMonth: false,
+      });
     }
   }
 
@@ -69,7 +73,8 @@ export function getDatesWithEvents(
     const endDate = event.end_date ?? event.start_date;
     if (endDate < firstDay || event.start_date > lastDay) continue;
 
-    const rangeStart = event.start_date < firstDay ? firstDay : event.start_date;
+    const rangeStart =
+      event.start_date < firstDay ? firstDay : event.start_date;
     const rangeEnd = endDate > lastDay ? lastDay : endDate;
 
     const current = new Date(rangeStart + "T00:00:00");

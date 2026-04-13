@@ -31,7 +31,9 @@ export default function Home() {
   useEffect(() => {
     async function fetchEvents() {
       if (!supabase) {
-        setError("Supabase is not configured. Check environment variables.");
+        setError(
+          "Could not fetch the events right now. Please try again later.",
+        );
         setLoading(false);
         return;
       }
@@ -70,9 +72,12 @@ export default function Home() {
     return events.filter((e) => e.category === selectedCategory);
   }, [events, selectedCategory]);
 
+  const todayString = useMemo(() => toDateString(new Date()), []);
+
   const categoryCounts = useMemo(() => {
+    const base = showTodayOnly ? getEventsForDate(events, todayString) : events;
     const counts: Record<EventCategory | "all", number> = {
-      all: events.length,
+      all: base.length,
       concert: 0,
       outdoor: 0,
       parade: 0,
@@ -82,13 +87,11 @@ export default function Home() {
       sports: 0,
       other: 0,
     };
-    for (const e of events) {
+    for (const e of base) {
       counts[e.category]++;
     }
     return counts;
-  }, [events]);
-
-  const todayString = useMemo(() => toDateString(new Date()), []);
+  }, [events, showTodayOnly, todayString]);
 
   const todayEventCount = useMemo(
     () => getEventsForDate(events, todayString).length,
@@ -109,7 +112,13 @@ export default function Home() {
     }
     if (viewMode === "list") return categoryFilteredEvents;
     return getEventsForDate(categoryFilteredEvents, selectedDate);
-  }, [viewMode, categoryFilteredEvents, selectedDate, showTodayOnly, todayString]);
+  }, [
+    viewMode,
+    categoryFilteredEvents,
+    selectedDate,
+    showTodayOnly,
+    todayString,
+  ]);
 
   const handleToggleView = useCallback(() => {
     setViewMode((prev) => (prev === "list" ? "calendar" : "list"));
@@ -165,7 +174,7 @@ export default function Home() {
   const lastUpdated =
     events.length > 0
       ? events.reduce((latest, e) =>
-          e.updated_at > latest.updated_at ? e : latest
+          e.updated_at > latest.updated_at ? e : latest,
         ).updated_at
       : null;
 

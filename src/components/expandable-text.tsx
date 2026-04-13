@@ -35,16 +35,14 @@ export default function ExpandableText({ text }: ExpandableTextProps) {
     <div>
       <p
         ref={textRef}
-        className={`text-sm text-gray-600 ${isExpanded ? "" : "line-clamp-2"}`}
-      >
+        className={`text-sm text-gray-600 ${isExpanded ? "" : "line-clamp-3"}`}>
         {text}
       </p>
       {isTruncated && (
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
+          className="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800">
           {isExpanded ? "See less" : "See more"}
         </button>
       )}
