@@ -3,7 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { Event, EventCategory } from "@/types/events";
 import { supabase } from "@/lib/supabase";
-import { toDateString, getDatesWithEvents, getEventsForDate } from "@/lib/date-utils";
+import {
+  toDateString,
+  getDatesWithEvents,
+  getEventsForDate,
+} from "@/lib/date-utils";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import EventList from "@/components/event-list";
@@ -18,6 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [showTodayOnly, setShowTodayOnly] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<string>(() =>
     toDateString(new Date()),
@@ -60,6 +65,13 @@ export default function Home() {
     return events.filter((e) => e.category === selectedCategory);
   }, [events, selectedCategory]);
 
+  const todayString = useMemo(() => toDateString(new Date()), []);
+
+  const todayEventCount = useMemo(
+    () => getEventsForDate(events, todayString).length,
+    [events, todayString],
+  );
+
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
@@ -69,13 +81,27 @@ export default function Home() {
   );
 
   const displayedEvents = useMemo(() => {
+    if (showTodayOnly) {
+      return getEventsForDate(categoryFilteredEvents, todayString);
+    }
     if (viewMode === "list") return categoryFilteredEvents;
     return getEventsForDate(categoryFilteredEvents, selectedDate);
-  }, [viewMode, categoryFilteredEvents, selectedDate]);
+  }, [viewMode, categoryFilteredEvents, selectedDate, showTodayOnly, todayString]);
 
   const handleToggleView = useCallback(() => {
     setViewMode((prev) => (prev === "list" ? "calendar" : "list"));
   }, []);
+
+  const handleToggleToday = useCallback(() => {
+    setShowTodayOnly((prev) => {
+      if (!prev) {
+        const now = new Date();
+        setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+        setSelectedDate(todayString);
+      }
+      return !prev;
+    });
+  }, [todayString]);
 
   const handlePrevMonth = useCallback(() => {
     setCurrentMonth((prev) => {
@@ -128,6 +154,9 @@ export default function Home() {
         <CategoryFilter
           selected={selectedCategory}
           onChange={setSelectedCategory}
+          showTodayOnly={showTodayOnly}
+          onToggleToday={handleToggleToday}
+          todayEventCount={todayEventCount}
         />
 
         {error && (
