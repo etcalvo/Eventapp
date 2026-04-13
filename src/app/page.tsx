@@ -70,6 +70,24 @@ export default function Home() {
     return events.filter((e) => e.category === selectedCategory);
   }, [events, selectedCategory]);
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<EventCategory | "all", number> = {
+      all: events.length,
+      concert: 0,
+      outdoor: 0,
+      parade: 0,
+      festival: 0,
+      family: 0,
+      market: 0,
+      sports: 0,
+      other: 0,
+    };
+    for (const e of events) {
+      counts[e.category]++;
+    }
+    return counts;
+  }, [events]);
+
   const todayString = useMemo(() => toDateString(new Date()), []);
 
   const todayEventCount = useMemo(
@@ -162,6 +180,7 @@ export default function Home() {
           showTodayOnly={showTodayOnly}
           onToggleToday={handleToggleToday}
           todayEventCount={todayEventCount}
+          categoryCounts={categoryCounts}
         />
 
         {error && (
