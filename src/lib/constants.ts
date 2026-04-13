@@ -1,5 +1,7 @@
 import type { EventCategory } from "@/types/events";
 
+export const BASE_PATH = "/Eventapp";
+
 export const EVENT_CATEGORIES: {
   value: EventCategory | "all";
   label: string;
