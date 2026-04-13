@@ -27,6 +27,9 @@ function formatDateRange(startDate: string, endDate: string | null): string {
 
 export default function EventCard({ event }: EventCardProps) {
   const category = getCategoryConfig(event.category);
+  const today = new Date().toISOString().split("T")[0];
+  const isToday =
+    event.start_date <= today && (event.end_date ?? event.start_date) >= today;
 
   return (
     <article className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -40,17 +43,24 @@ export default function EventCard({ event }: EventCardProps) {
       )}
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${category.color}`}
-          >
-            {category.label}
-          </span>
-          {event.is_free && (
-            <span className="inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
-              Free
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${category.color}`}>
+              {category.label}
             </span>
-          )}
+            {isToday && (
+              <span className="inline-block rounded-full bg-teal-600 px-2 py-0.5 text-xs font-medium text-white">
+                Today
+              </span>
+            )}
+            {event.is_free && (
+              <span className="inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                Free
+              </span>
+            )}
+          </div>
+          <AddToCalendarButton event={event} />
         </div>
 
         <h3 className="text-base font-semibold text-gray-900 leading-tight">
@@ -73,26 +83,25 @@ export default function EventCard({ event }: EventCardProps) {
               {event.location}, {event.city}
             </span>
           </div>
-          {event.price_info && (
-            <div className="flex items-center gap-1">
-              <span>💰</span>
-              <span>{event.price_info}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <AddToCalendarButton event={event} />
-          {event.url && (
-            <a
-              href={event.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-800"
-            >
-              More info →
-            </a>
-          )}
+          <div className="flex items-center justify-between">
+            {event.price_info ? (
+              <div className="flex items-center gap-1">
+                <span>💰</span>
+                <span>{event.price_info}</span>
+              </div>
+            ) : (
+              <span />
+            )}
+            {event.url && (
+              <a
+                href={event.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-blue-600 hover:text-blue-800">
+                More info →
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </article>
