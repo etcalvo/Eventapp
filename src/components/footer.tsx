@@ -9,7 +9,7 @@ export default function Footer({ lastUpdated }: FooterProps) {
         <p>Events discovered by Claude AI</p>
         {lastUpdated && (
           <p className="mt-1">
-            Last updated:{" "}
+            Data last fetched:{" "}
             {new Date(lastUpdated).toLocaleDateString("en-CA", {
               year: "numeric",
               month: "long",
