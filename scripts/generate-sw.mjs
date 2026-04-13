@@ -1,10 +1,23 @@
-const CACHE_NAME = "bc-events-v1";
+import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+
+const buildId = createHash("md5")
+  .update(Date.now().toString())
+  .digest("hex")
+  .slice(0, 8);
+
+const CACHE_NAME = `bc-events-${buildId}`;
 const BASE_PATH = "/Eventapp";
 
+const sw = `// Auto-generated at build time — do not edit manually.
+// Build: ${buildId}
+const CACHE_NAME = "${CACHE_NAME}";
+const BASE_PATH = "${BASE_PATH}";
+
 const PRECACHE_URLS = [
-  `${BASE_PATH}/`,
-  `${BASE_PATH}/icons/icon-192x192.png`,
-  `${BASE_PATH}/icons/icon-512x512.png`,
+  \`\${BASE_PATH}/\`,
+  \`\${BASE_PATH}/icons/icon-192x192.png\`,
+  \`\${BASE_PATH}/icons/icon-512x512.png\`,
 ];
 
 self.addEventListener("install", (event) => {
@@ -49,7 +62,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 function isStaticAsset(pathname) {
-  return /\.(js|css|png|jpg|jpeg|svg|ico|woff2?)$/i.test(pathname);
+  return /\\.(js|css|png|jpg|jpeg|svg|ico|woff2?)$/i.test(pathname);
 }
 
 async function cacheFirst(request) {
@@ -81,8 +94,12 @@ async function networkFirst(request) {
     if (cached) return cached;
 
     if (request.mode === "navigate") {
-      return caches.match(`${BASE_PATH}/`);
+      return caches.match(\`\${BASE_PATH}/\`);
     }
     return new Response("Offline", { status: 503 });
   }
 }
+`;
+
+writeFileSync("public/sw.js", sw);
+console.log(`Generated sw.js with build ID: ${buildId}`);

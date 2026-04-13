@@ -8,6 +8,9 @@ node_modules/
 .next/
 out/
 
+# Generated service worker (built via scripts/generate-sw.mjs)
+public/sw.js
+
 # Build
 build/
 dist/
