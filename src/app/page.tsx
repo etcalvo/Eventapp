@@ -37,7 +37,7 @@ export default function Home() {
       }
 
       try {
-        const today = new Date().toISOString().split("T")[0];
+        const today = toDateString(new Date());
         const { data, error: dbError } = await supabase
           .from("events")
           .select("*")
@@ -48,7 +48,12 @@ export default function Home() {
         if (dbError) {
           setError(`Failed to load events: ${dbError.message}`);
         } else {
-          setEvents(data as Event[]);
+          const fetched = data as Event[];
+          const upcoming = fetched.filter((e) => {
+            const endDate = e.end_date ?? e.start_date;
+            return e.start_date >= today || endDate >= today;
+          });
+          setEvents(upcoming);
         }
       } catch {
         setError("Could not connect to the database. Please try again later.");
