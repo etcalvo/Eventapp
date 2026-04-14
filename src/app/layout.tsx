@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "Upcoming events in British Columbia, Canada. Concerts, outdoor activities, festivals, parades, and more.",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "BC Events",
   },
   icons: {
@@ -32,6 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full dark antialiased">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <ServiceWorkerRegister />
         <ThemeProvider>{children}</ThemeProvider>
