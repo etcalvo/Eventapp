@@ -23,9 +23,7 @@ export default function ExpandableText({ text }: ExpandableTextProps) {
       checkTruncation();
     }
     const handleResize = () => {
-      if (!isExpanded) {
-        checkTruncation();
-      }
+      if (!isExpanded) checkTruncation();
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -35,14 +33,18 @@ export default function ExpandableText({ text }: ExpandableTextProps) {
     <div>
       <p
         ref={textRef}
-        className={`text-sm text-gray-600 ${isExpanded ? "" : "line-clamp-3"}`}>
+        className={`text-sm ${isExpanded ? "" : "line-clamp-3"}`}
+        style={{ color: "var(--text-second)" }}
+      >
         {text}
       </p>
       {isTruncated && (
         <button
           type="button"
           onClick={() => setIsExpanded((prev) => !prev)}
-          className="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800">
+          className="mt-1 text-xs font-medium transition-opacity hover:opacity-70"
+          style={{ color: "var(--text-second)" }}
+        >
           {isExpanded ? "See less" : "See more"}
         </button>
       )}
