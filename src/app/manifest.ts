@@ -5,10 +5,10 @@ export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BC Family Events",
+    name: "BC Events",
     short_name: "BC Events",
     description:
-      "Upcoming family-friendly events in British Columbia, Canada. Concerts, outdoor activities, festivals, parades, and more.",
+      "Upcoming events in British Columbia, Canada. Concerts, outdoor activities, festivals, parades, and more.",
     start_url: `${BASE_PATH}/`,
     display: "standalone",
     background_color: "#f9fafb",

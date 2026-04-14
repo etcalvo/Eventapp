@@ -44,7 +44,6 @@ export default function Home() {
           .from("events")
           .select("*")
           .or(`start_date.gte.${today},end_date.gte.${today}`)
-          .eq("family_friendly", true)
           .order("start_date", { ascending: true });
 
         if (dbError) {
