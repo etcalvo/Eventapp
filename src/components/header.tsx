@@ -9,11 +9,11 @@ export default function Header({ viewMode, onToggleView }: HeaderProps) {
       <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3">
         <img
           src="/Eventapp/logo.png"
-          alt="BC Family Events"
+          alt="BC Events"
           className="h-10 w-10 rounded-full"
         />
         <div className="flex-1">
-          <h1 className="text-lg font-bold text-gray-900">BC Family Events</h1>
+          <h1 className="text-lg font-bold text-gray-900">BC Events</h1>
           <p className="text-xs text-gray-500">British Columbia, Canada</p>
         </div>
         <button

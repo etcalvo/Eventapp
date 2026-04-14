@@ -84,7 +84,7 @@ export function generateIcsContent(event: Event): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//BC Family Events//EN",
+    "PRODID:-//BC Events//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

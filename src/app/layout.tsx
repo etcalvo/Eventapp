@@ -10,9 +10,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BC Family Events",
+  title: "BC Events",
   description:
-    "Upcoming family-friendly events in British Columbia, Canada. Concerts, outdoor activities, festivals, parades, and more.",
+    "Upcoming events in British Columbia, Canada. Concerts, outdoor activities, festivals, parades, and more.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
