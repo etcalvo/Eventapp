@@ -13,6 +13,7 @@ import Footer from "@/components/footer";
 import EventList from "@/components/event-list";
 import CategoryFilter from "@/components/category-filter";
 import MonthCalendar from "@/components/month-calendar";
+import BackToTop from "@/components/back-to-top";
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -236,6 +237,7 @@ export default function Home() {
       </main>
 
       <Footer lastUpdated={lastUpdated} />
+      <BackToTop />
     </>
   );
 }
