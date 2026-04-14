@@ -22,36 +22,58 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   return (
     <div className="flex gap-2 overflow-x-auto py-2 px-0.5 scrollbar-none">
+      {/* Today pill */}
       <button
         onClick={onToggleToday}
-        className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all"
+        style={
           showTodayOnly
-            ? "border-teal-600 bg-teal-600 text-white"
-            : "border-teal-600 bg-white text-teal-700 hover:bg-teal-50"
-        }`}>
-        Today only
+            ? {
+                background: "var(--today-color)",
+                color: "#fff",
+              }
+            : {
+                background: "var(--today-bg)",
+                color: "var(--today-color)",
+                border: "1px solid color-mix(in srgb, var(--today-color) 30%, transparent)",
+              }
+        }
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-current today-pulse" aria-hidden="true" />
+        Today
         {todayEventCount > 0 && (
-          <span className="opacity-80">{todayEventCount}</span>
+          <span className="font-normal opacity-75">{todayEventCount}</span>
         )}
       </button>
 
-      <div className="shrink-0 self-stretch w-px bg-gray-300" />
+      <div className="shrink-0 self-stretch w-px" style={{ background: "var(--border)" }} />
 
       {EVENT_CATEGORIES.map((cat) => {
         const count = categoryCounts[cat.value];
+        const isSelected = selected === cat.value;
         return (
           <button
             key={cat.value}
             onClick={() => onChange(cat.value)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-              selected === cat.value
-                ? cat.value === "all"
-                  ? "bg-gray-800 text-white"
-                  : cat.color
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}>
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all"
+            style={
+              isSelected
+                ? {
+                    background: cat.accent,
+                    color: "#0e1117",
+                    boxShadow: `0 0 14px ${cat.accent}55`,
+                  }
+                : {
+                    background: `${cat.accent}12`,
+                    color: cat.accent,
+                    border: `1px solid ${cat.accent}30`,
+                  }
+            }
+          >
             {cat.label}
-            {count > 0 && <span className="opacity-60">{count}</span>}
+            {count > 0 && (
+              <span className="font-normal opacity-70">{count}</span>
+            )}
           </button>
         );
       })}

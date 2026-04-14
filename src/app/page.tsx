@@ -192,7 +192,7 @@ export default function Home() {
         />
 
         {error && (
-          <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 rounded-xl px-4 py-3 text-sm" style={{ background: "var(--error-bg)", color: "var(--error-text)", border: "1px solid var(--error-border)" }}>
             {error}
           </div>
         )}
@@ -209,7 +209,7 @@ export default function Home() {
                 onNextMonth={handleNextMonth}
               />
             </div>
-            <h2 className="mt-4 text-sm font-medium text-gray-700">
+            <h2 className="mt-4 text-sm font-medium" style={{ color: "var(--text-second)" }}>
               {new Date(selectedDate + "T00:00:00").toLocaleDateString(
                 "en-CA",
                 { weekday: "long", month: "long", day: "numeric" },
@@ -220,11 +220,12 @@ export default function Home() {
 
         <div className="mt-3">
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-64 animate-pulse rounded-lg bg-gray-100"
+                  className="h-28 animate-pulse rounded-xl"
+                  style={{ background: "var(--skeleton)" }}
                 />
               ))}
             </div>

@@ -8,14 +8,19 @@ interface EventListProps {
 export default function EventList({ events }: EventListProps) {
   if (events.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+      <div className="py-20 text-center">
+        <div
+          className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+          style={{ background: "var(--empty-bg)", border: "1px solid var(--empty-border)" }}
+        >
           <svg
-            className="h-10 w-10 text-gray-400"
+            className="h-8 w-8"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={1.5}>
+            strokeWidth={1.5}
+            style={{ color: "var(--text-muted)" }}
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -23,16 +28,16 @@ export default function EventList({ events }: EventListProps) {
             />
           </svg>
         </div>
-        <p className="text-lg font-medium text-gray-600">No events found</p>
-        <p className="mt-1 text-sm text-gray-400">Check back soon</p>
+        <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>No events found</p>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>Check back soon — updated every 15 days</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {events.map((event) => (
-        <EventCard key={event.id} event={event} />
+    <div className="flex flex-col gap-3">
+      {events.map((event, index) => (
+        <EventCard key={event.id} event={event} index={index} />
       ))}
     </div>
   );

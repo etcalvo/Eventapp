@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import ServiceWorkerRegister from "@/components/service-worker-register";
+import ThemeProvider from "@/components/theme-provider";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#0e1117",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -30,10 +31,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-gray-50 font-sans text-gray-900">
+    <html lang="en" className="h-full dark antialiased">
+      <body className="min-h-full flex flex-col font-sans">
         <ServiceWorkerRegister />
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
