@@ -12,6 +12,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import EventList from "@/components/event-list";
 import CategoryFilter from "@/components/category-filter";
+import LocationFilter from "@/components/location-filter";
 import MonthCalendar from "@/components/month-calendar";
 import BackToTop from "@/components/back-to-top";
 
@@ -20,6 +21,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<
     EventCategory | "all"
   >("all");
+  const [selectedCity, setSelectedCity] = useState<string | "all">("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
@@ -72,10 +74,18 @@ export default function Home() {
     return events.filter((e) => e.category === selectedCategory);
   }, [events, selectedCategory]);
 
+  const cityFilteredEvents = useMemo(() => {
+    if (selectedCity === "all") return categoryFilteredEvents;
+    return categoryFilteredEvents.filter((e) => e.city === selectedCity);
+  }, [categoryFilteredEvents, selectedCity]);
+
   const todayString = useMemo(() => toDateString(new Date()), []);
 
   const categoryCounts = useMemo(() => {
-    const base = showTodayOnly ? getEventsForDate(events, todayString) : events;
+    let base = showTodayOnly ? getEventsForDate(events, todayString) : events;
+    if (selectedCity !== "all") {
+      base = base.filter((e) => e.city === selectedCity);
+    }
     const counts: Record<EventCategory | "all", number> = {
       all: base.length,
       concert: 0,
@@ -91,7 +101,26 @@ export default function Home() {
       counts[e.category]++;
     }
     return counts;
-  }, [events, showTodayOnly, todayString]);
+  }, [events, showTodayOnly, todayString, selectedCity]);
+
+  const availableCities = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of events) if (e.city) set.add(e.city);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [events]);
+
+  const cityCounts = useMemo(() => {
+    let base = showTodayOnly ? getEventsForDate(events, todayString) : events;
+    if (selectedCategory !== "all") {
+      base = base.filter((e) => e.category === selectedCategory);
+    }
+    const counts: Record<string, number> = { all: base.length };
+    for (const e of base) {
+      if (!e.city) continue;
+      counts[e.city] = (counts[e.city] ?? 0) + 1;
+    }
+    return counts;
+  }, [events, showTodayOnly, todayString, selectedCategory]);
 
   const todayEventCount = useMemo(
     () => getEventsForDate(events, todayString).length,
@@ -102,19 +131,19 @@ export default function Home() {
   const month = currentMonth.getMonth();
 
   const datesWithEvents = useMemo(
-    () => getDatesWithEvents(categoryFilteredEvents, year, month),
-    [categoryFilteredEvents, year, month],
+    () => getDatesWithEvents(cityFilteredEvents, year, month),
+    [cityFilteredEvents, year, month],
   );
 
   const displayedEvents = useMemo(() => {
     if (showTodayOnly) {
-      return getEventsForDate(categoryFilteredEvents, todayString);
+      return getEventsForDate(cityFilteredEvents, todayString);
     }
-    if (viewMode === "list") return categoryFilteredEvents;
-    return getEventsForDate(categoryFilteredEvents, selectedDate);
+    if (viewMode === "list") return cityFilteredEvents;
+    return getEventsForDate(cityFilteredEvents, selectedDate);
   }, [
     viewMode,
-    categoryFilteredEvents,
+    cityFilteredEvents,
     selectedDate,
     showTodayOnly,
     todayString,
@@ -190,6 +219,13 @@ export default function Home() {
           onToggleToday={handleToggleToday}
           todayEventCount={todayEventCount}
           categoryCounts={categoryCounts}
+        />
+
+        <LocationFilter
+          selected={selectedCity}
+          onChange={setSelectedCity}
+          cities={availableCities}
+          cityCounts={cityCounts}
         />
 
         {error && (
