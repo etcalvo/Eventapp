@@ -3,9 +3,11 @@ import EventCard from "./event-card";
 
 interface EventListProps {
   events: Event[];
+  visitedIds: Set<number>;
+  onToggleVisited: (id: number) => void;
 }
 
-export default function EventList({ events }: EventListProps) {
+export default function EventList({ events, visitedIds, onToggleVisited }: EventListProps) {
   if (events.length === 0) {
     return (
       <div className="py-20 text-center">
@@ -37,7 +39,13 @@ export default function EventList({ events }: EventListProps) {
   return (
     <div className="flex flex-col gap-3">
       {events.map((event, index) => (
-        <EventCard key={event.id} event={event} index={index} />
+        <EventCard
+          key={event.id}
+          event={event}
+          index={index}
+          isVisited={visitedIds.has(event.id)}
+          onToggleVisited={onToggleVisited}
+        />
       ))}
     </div>
   );
