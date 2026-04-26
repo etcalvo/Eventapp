@@ -15,6 +15,7 @@ import CategoryFilter from "@/components/category-filter";
 import LocationFilter from "@/components/location-filter";
 import MonthCalendar from "@/components/month-calendar";
 import BackToTop from "@/components/back-to-top";
+import { useVisitedEvents } from "@/lib/use-visited-events";
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -30,6 +31,8 @@ export default function Home() {
   const [selectedDate, setSelectedDate] = useState<string>(() =>
     toDateString(new Date()),
   );
+  const [showVisited, setShowVisited] = useState(false);
+  const { visitedIds, toggleVisited, cleanupVisited } = useVisitedEvents();
 
   useEffect(() => {
     async function fetchEvents() {
@@ -58,6 +61,7 @@ export default function Home() {
             return e.start_date >= today || endDate >= today;
           });
           setEvents(upcoming);
+          cleanupVisited(new Set(upcoming.map((e) => e.id)));
         }
       } catch {
         setError("Could not connect to the database. Please try again later.");
@@ -67,7 +71,7 @@ export default function Home() {
     }
 
     fetchEvents();
-  }, []);
+  }, [cleanupVisited]);
 
   const categoryFilteredEvents = useMemo(() => {
     if (selectedCategory === "all") return events;
@@ -131,22 +135,34 @@ export default function Home() {
   const month = currentMonth.getMonth();
 
   const datesWithEvents = useMemo(
-    () => getDatesWithEvents(cityFilteredEvents, year, month),
-    [cityFilteredEvents, year, month],
+    () =>
+      getDatesWithEvents(
+        cityFilteredEvents.filter((e) => !visitedIds.has(e.id)),
+        year,
+        month,
+      ),
+    [cityFilteredEvents, visitedIds, year, month],
   );
 
   const displayedEvents = useMemo(() => {
-    if (showTodayOnly) {
-      return getEventsForDate(cityFilteredEvents, todayString);
+    if (showVisited) {
+      const visited = events.filter((e) => visitedIds.has(e.id));
+      if (viewMode === "calendar") return getEventsForDate(visited, selectedDate);
+      return visited;
     }
-    if (viewMode === "list") return cityFilteredEvents;
-    return getEventsForDate(cityFilteredEvents, selectedDate);
+    const base = cityFilteredEvents.filter((e) => !visitedIds.has(e.id));
+    if (showTodayOnly) return getEventsForDate(base, todayString);
+    if (viewMode === "list") return base;
+    return getEventsForDate(base, selectedDate);
   }, [
     viewMode,
     cityFilteredEvents,
     selectedDate,
     showTodayOnly,
     todayString,
+    visitedIds,
+    showVisited,
+    events,
   ]);
 
   const handleToggleView = useCallback(() => {
@@ -200,6 +216,10 @@ export default function Home() {
     setSelectedDate(dateString);
   }, []);
 
+  const handleToggleShowVisited = useCallback(() => {
+    setShowVisited((prev) => !prev);
+  }, []);
+
   const lastUpdated =
     events.length > 0
       ? events.reduce((latest, e) =>
@@ -219,6 +239,9 @@ export default function Home() {
           onToggleToday={handleToggleToday}
           todayEventCount={todayEventCount}
           categoryCounts={categoryCounts}
+          visitedCount={visitedIds.size}
+          showVisited={showVisited}
+          onToggleShowVisited={handleToggleShowVisited}
         />
 
         <LocationFilter
@@ -267,7 +290,11 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <EventList events={displayedEvents} />
+            <EventList
+              events={displayedEvents}
+              visitedIds={visitedIds}
+              onToggleVisited={toggleVisited}
+            />
           )}
         </div>
       </main>
