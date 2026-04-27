@@ -35,6 +35,8 @@ export default function EventCard({
   const today = toDateString(new Date());
   const isToday =
     event.start_date <= today && (event.end_date ?? event.start_date) >= today;
+  const isOngoing =
+    event.start_date < today && (event.end_date ?? event.start_date) >= today;
 
   return (
     <article
@@ -60,7 +62,15 @@ export default function EventCard({
             >
               {category.label}
             </span>
-            {isToday && (
+            {isOngoing ? (
+              <span
+                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ background: "var(--ongoing-bg)", color: "var(--ongoing-color)" }}
+              >
+                <span className="h-1 w-1 rounded-full bg-current" aria-hidden="true" />
+                Ongoing
+              </span>
+            ) : isToday && (
               <span
                 className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
                 style={{ background: "var(--today-bg)", color: "var(--today-color)" }}

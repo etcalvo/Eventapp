@@ -1,3 +1,5 @@
+import type { Event } from "@/types/events";
+
 export interface CalendarDay {
   date: Date;
   dateString: string;
@@ -92,4 +94,16 @@ export function getEventsForDate<
   T extends { start_date: string; end_date: string | null },
 >(events: T[], dateString: string): T[] {
   return events.filter((e) => isEventOnDate(e, dateString));
+}
+
+export function sortEventsByRelevance(
+  events: Event[],
+  _today: string,
+): Event[] {
+  return [...events].sort((a, b) => {
+    const aEnd = a.end_date ?? a.start_date;
+    const bEnd = b.end_date ?? b.start_date;
+    if (aEnd !== bEnd) return aEnd.localeCompare(bEnd);
+    return a.start_date.localeCompare(b.start_date);
+  });
 }
