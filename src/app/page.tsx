@@ -7,6 +7,7 @@ import {
   toDateString,
   getDatesWithEvents,
   getEventsForDate,
+  sortEventsByRelevance,
 } from "@/lib/date-utils";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -152,7 +153,7 @@ export default function Home() {
     }
     const base = cityFilteredEvents.filter((e) => !visitedIds.has(e.id));
     if (showTodayOnly) return getEventsForDate(base, todayString);
-    if (viewMode === "list") return base;
+    if (viewMode === "list") return sortEventsByRelevance(base, todayString);
     return getEventsForDate(base, selectedDate);
   }, [
     viewMode,

@@ -23,6 +23,8 @@
   --today-bg:     rgba(255,107,107,0.15);
   --free-color:   #34d399;
   --free-bg:      rgba(52,211,153,0.15);
+  --ongoing-color: #fb923c;
+  --ongoing-bg:    rgba(251,146,60,0.15);
   --divider:      rgba(255,255,255,0.05);
   --skeleton:     #161b25;
   --error-bg:     rgba(248,113,113,0.1);
@@ -48,6 +50,8 @@ html:not(.dark) {
   --today-bg:     rgba(220,38,38,0.1);
   --free-color:   #059669;
   --free-bg:      rgba(5,150,105,0.1);
+  --ongoing-color: #ea580c;
+  --ongoing-bg:    rgba(234,88,12,0.1);
   --divider:      rgba(0,0,0,0.06);
   --skeleton:     #e5e7eb;
   --error-bg:     rgba(220,38,38,0.08);
