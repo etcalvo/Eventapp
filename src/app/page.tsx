@@ -5,7 +5,6 @@ import type { Event, EventCategory } from "@/types/events";
 import { supabase } from "@/lib/supabase";
 import {
   toDateString,
-  getDatesWithEvents,
   getEventsForDate,
   sortEventsByRelevance,
 } from "@/lib/date-utils";
@@ -14,7 +13,6 @@ import Footer from "@/components/footer";
 import EventList from "@/components/event-list";
 import CategoryFilter from "@/components/category-filter";
 import LocationFilter from "@/components/location-filter";
-import MonthCalendar from "@/components/month-calendar";
 import BackToTop from "@/components/back-to-top";
 import { useVisitedEvents } from "@/lib/use-visited-events";
 
@@ -23,16 +21,13 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<
     EventCategory | "all"
   >("all");
-  const [selectedCity, setSelectedCity] = useState<string | "all">("all");
+  const [selectedCities, setSelectedCities] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [showTodayOnly, setShowTodayOnly] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
-  const [selectedDate, setSelectedDate] = useState<string>(() =>
-    toDateString(new Date()),
-  );
   const [showVisited, setShowVisited] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { visitedIds, toggleVisited, cleanupVisited } = useVisitedEvents();
 
   useEffect(() => {
@@ -80,16 +75,24 @@ export default function Home() {
   }, [events, selectedCategory]);
 
   const cityFilteredEvents = useMemo(() => {
-    if (selectedCity === "all") return categoryFilteredEvents;
-    return categoryFilteredEvents.filter((e) => e.city === selectedCity);
-  }, [categoryFilteredEvents, selectedCity]);
+    if (selectedCities.size === 0) return categoryFilteredEvents;
+    return categoryFilteredEvents.filter((e) => selectedCities.has(e.city));
+  }, [categoryFilteredEvents, selectedCities]);
+
+  const searchFilteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return cityFilteredEvents;
+    const lower = searchQuery.toLowerCase();
+    return cityFilteredEvents.filter((e) =>
+      e.title.toLowerCase().includes(lower),
+    );
+  }, [cityFilteredEvents, searchQuery]);
 
   const todayString = useMemo(() => toDateString(new Date()), []);
 
   const categoryCounts = useMemo(() => {
     let base = showTodayOnly ? getEventsForDate(events, todayString) : events;
-    if (selectedCity !== "all") {
-      base = base.filter((e) => e.city === selectedCity);
+    if (selectedCities.size > 0) {
+      base = base.filter((e) => selectedCities.has(e.city));
     }
     const counts: Record<EventCategory | "all", number> = {
       all: base.length,
@@ -106,7 +109,7 @@ export default function Home() {
       counts[e.category]++;
     }
     return counts;
-  }, [events, showTodayOnly, todayString, selectedCity]);
+  }, [events, showTodayOnly, todayString, selectedCities]);
 
   const availableCities = useMemo(() => {
     const set = new Set<string>();
@@ -132,33 +135,15 @@ export default function Home() {
     [events, todayString],
   );
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-
-  const datesWithEvents = useMemo(
-    () =>
-      getDatesWithEvents(
-        cityFilteredEvents.filter((e) => !visitedIds.has(e.id)),
-        year,
-        month,
-      ),
-    [cityFilteredEvents, visitedIds, year, month],
-  );
-
   const displayedEvents = useMemo(() => {
     if (showVisited) {
-      const visited = events.filter((e) => visitedIds.has(e.id));
-      if (viewMode === "calendar") return getEventsForDate(visited, selectedDate);
-      return visited;
+      return events.filter((e) => visitedIds.has(e.id));
     }
-    const base = cityFilteredEvents.filter((e) => !visitedIds.has(e.id));
+    const base = searchFilteredEvents.filter((e) => !visitedIds.has(e.id));
     if (showTodayOnly) return getEventsForDate(base, todayString);
-    if (viewMode === "list") return sortEventsByRelevance(base, todayString);
-    return getEventsForDate(base, selectedDate);
+    return sortEventsByRelevance(base, todayString);
   }, [
-    viewMode,
-    cityFilteredEvents,
-    selectedDate,
+    searchFilteredEvents,
     showTodayOnly,
     todayString,
     visitedIds,
@@ -166,59 +151,36 @@ export default function Home() {
     events,
   ]);
 
-  const handleToggleView = useCallback(() => {
-    setViewMode((prev) => (prev === "list" ? "calendar" : "list"));
-  }, []);
-
   const handleToggleToday = useCallback(() => {
-    setShowTodayOnly((prev) => {
-      if (!prev) {
-        const now = new Date();
-        setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
-        setSelectedDate(todayString);
-      }
-      return !prev;
-    });
-  }, [todayString]);
-
-  const handlePrevMonth = useCallback(() => {
-    setCurrentMonth((prev) => {
-      const newMonth = new Date(prev.getFullYear(), prev.getMonth() - 1, 1);
-      const today = new Date();
-      if (
-        newMonth.getFullYear() === today.getFullYear() &&
-        newMonth.getMonth() === today.getMonth()
-      ) {
-        setSelectedDate(toDateString(today));
-      } else {
-        setSelectedDate(toDateString(newMonth));
-      }
-      return newMonth;
-    });
-  }, []);
-
-  const handleNextMonth = useCallback(() => {
-    setCurrentMonth((prev) => {
-      const newMonth = new Date(prev.getFullYear(), prev.getMonth() + 1, 1);
-      const today = new Date();
-      if (
-        newMonth.getFullYear() === today.getFullYear() &&
-        newMonth.getMonth() === today.getMonth()
-      ) {
-        setSelectedDate(toDateString(today));
-      } else {
-        setSelectedDate(toDateString(newMonth));
-      }
-      return newMonth;
-    });
-  }, []);
-
-  const handleSelectDate = useCallback((dateString: string) => {
-    setSelectedDate(dateString);
+    setShowTodayOnly((prev) => !prev);
   }, []);
 
   const handleToggleShowVisited = useCallback(() => {
     setShowVisited((prev) => !prev);
+  }, []);
+
+  const handleToggleSearch = useCallback(() => {
+    setIsSearchOpen((prev) => {
+      if (prev) setSearchQuery("");
+      return !prev;
+    });
+  }, []);
+
+  const handleSearchChange = useCallback((q: string) => {
+    setSearchQuery(q);
+  }, []);
+
+  const handleCityChange = useCallback((city: string) => {
+    if (city === "all") {
+      setSelectedCities(new Set());
+    } else {
+      setSelectedCities((prev) => {
+        const next = new Set(prev);
+        if (next.has(city)) next.delete(city);
+        else next.add(city);
+        return next;
+      });
+    }
   }, []);
 
   const lastUpdated =
@@ -230,7 +192,12 @@ export default function Home() {
 
   return (
     <>
-      <Header viewMode={viewMode} onToggleView={handleToggleView} />
+      <Header
+        isSearchOpen={isSearchOpen}
+        onToggleSearch={handleToggleSearch}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+      />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
         <CategoryFilter
@@ -246,8 +213,8 @@ export default function Home() {
         />
 
         <LocationFilter
-          selected={selectedCity}
-          onChange={setSelectedCity}
+          selected={selectedCities}
+          onChange={handleCityChange}
           cities={availableCities}
           cityCounts={cityCounts}
         />
@@ -256,27 +223,6 @@ export default function Home() {
           <div className="mt-4 rounded-xl px-4 py-3 text-sm" style={{ background: "var(--error-bg)", color: "var(--error-text)", border: "1px solid var(--error-border)" }}>
             {error}
           </div>
-        )}
-
-        {viewMode === "calendar" && (
-          <>
-            <div className="mt-4">
-              <MonthCalendar
-                currentMonth={currentMonth}
-                selectedDate={selectedDate}
-                datesWithEvents={datesWithEvents}
-                onSelectDate={handleSelectDate}
-                onPrevMonth={handlePrevMonth}
-                onNextMonth={handleNextMonth}
-              />
-            </div>
-            <h2 className="mt-4 text-sm font-medium" style={{ color: "var(--text-second)" }}>
-              {new Date(selectedDate + "T00:00:00").toLocaleDateString(
-                "en-CA",
-                { weekday: "long", month: "long", day: "numeric" },
-              )}
-            </h2>
-          </>
         )}
 
         <div className="mt-3">

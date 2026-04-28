@@ -3,8 +3,8 @@
 const LOCATION_ACCENT = "#64b5ac";
 
 interface LocationFilterProps {
-  selected: string | "all";
-  onChange: (city: string | "all") => void;
+  selected: Set<string>;
+  onChange: (city: string) => void;
   cities: string[];
   cityCounts: Record<string, number>;
 }
@@ -15,9 +15,9 @@ export default function LocationFilter({
   cities,
   cityCounts,
 }: LocationFilterProps) {
-  const renderPill = (value: string | "all", label: string) => {
+  const renderPill = (value: string, label: string) => {
     const count = cityCounts[value] ?? 0;
-    const isSelected = selected === value;
+    const isSelected = value === "all" ? selected.size === 0 : selected.has(value);
     return (
       <button
         key={value}
